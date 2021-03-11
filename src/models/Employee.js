@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const NodeRSA = require('node-rsa');
+const key = new NodeRSA({b: 1024});
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('myTotalySecretKey');
 
 const employeeSchema = new mongoose.Schema({
     name: {
@@ -20,6 +24,10 @@ const employeeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    resetLink: {
+        data: String,
+        default: ''
+    },
     tokens: [{
         token: {
             type: String,
@@ -34,11 +42,24 @@ employeeSchema.methods.generateEmployeeAuthToken = async function() {
         const employee = this
         // here the secret key is minimum 32 character thisisloginregistrationforpractice
         const token = jwt.sign({_id: employee._id.toString()}, process.env.TOKEN_SECRET_KEY)
-        
-        employee.tokens = employee.tokens.concat({ token }) // Here token is token:token first is in field - second is variable so we write {token}
+        // console.log(token);
+        // const encrypted_token = key.encrypt(token, 'base64');
+        // console.log('encrypted: ', encrypted_token);
+
+        // const decrypted_token = key.decrypt(encrypted_token, 'utf8');
+        // console.log('decrypted: ', decrypted_token);
+
+        const encryptedString = cryptr.encrypt(token);
+        // console.log(`encrypted : ${encryptedString}`);
+
+        // const decryptedString = cryptr.decrypt(encryptedString);
+        // console.log(`decrypted : ${decryptedString}`);
+
+        employee.tokens = employee.tokens.concat({ token: encryptedString }) // Here token is token:token first is in field - second is variable so we write {token}
         await employee.save()
 
-        return token
+        // return token
+        return encryptedString
     } catch (error) {
         console.log(error);
     }

@@ -17,5 +17,9 @@ router.get('/signout', employeeAuthMiddleware, employeeController.signout);
 router.get('/signout-all', employeeAuthMiddleware, employeeController.signout_all);
 
 router.get('/forgot-password', employeeController.forgot_password_get);
+router.post('/forgot-password', employeeController.forgot_password_post);
+
+router.get('/reset-password/:id/:token', employeeController.reset_password_get);
+router.post('/reset-password/:id/:token', employeeController.reset_password_post);
 
 module.exports = router
